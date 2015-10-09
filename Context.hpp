@@ -44,7 +44,6 @@ namespace OpenGL
         virtual ~Context();
 
         virtual void Make_current() = 0;
-        virtual void Swap() = 0;
 
         virtual void * Get_proc_address(const char * name) = 0;
 
