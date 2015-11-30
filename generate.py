@@ -2,15 +2,17 @@ import gl
 import gljson
 import sys
 import whitelist
+import os.path
 	
 def beginFunctions( file ) :
 	file.write (
-	'        /* Entry points */\n'
-	'        struct Functions\n'
-	'        {\n' );
+	'    /* Entry points */\n'
+	'    struct Functions\n'
+	'    {\n' );
 
 def beginGuardian( file, name ) :
-	guardian = "O8_OPENGL_" + name.replace( '.', '_' );
+	path, file_name = os.path.split(name)
+	guardian = "O8_OPENGL_" + file_name.replace( '.', '_' );
 	file.write (
 	'#ifndef {}\n'
 	'#define {}\n'
@@ -18,17 +20,15 @@ def beginGuardian( file, name ) :
 	
 def beginLoadGL( file ) :
 	file.write(
-	'        void LoadGL(Context & context)\n'
-	'        {\n'
-	'            Functions & gl = context.m_gl_functions;\n'
+	'    void LoadGL(Context & context)\n'
+	'    {\n'
+	'        Functions & gl = context.m_gl_functions;\n'
 	'\n');
 	
 def beginNamespace( file ) :
 	file.write (
-	'namespace O8\n'
-	'{\n'
-	'    namespace OpenGL\n'
-	'    {\n' );
+	'namespace OpenGL\n'
+	'{\n' );
 	
 def convertParamType( type_str ) :
 	type = str();
@@ -144,10 +144,11 @@ def convertType( type ) :
 	
 def endFunctions( file ) :
 	file.write (
-	'        };\n' );
+	'    };\n' );
 	
 def endGuardian( file, name ) :
-	guardian = "O8_OPENGL_" + name;
+	path, file_name = os.path.split(name)
+	guardian = "O8_OPENGL_" + file_name;
 	file.write (
 	'\n'
 	'#endif /* {} */\n'
@@ -155,12 +156,11 @@ def endGuardian( file, name ) :
 	
 def endLoadGL( file ) :
 	file.write(
-	'        }\n' );
+	'    }\n' );
 	
 def endNamespace( file ) :
 	file.write (
-	'    } /* namespace OpenGL */\n'
-	'} /* namespace O8 */\n' );
+	'} /* namespace OpenGL */\n');
 	
 def writeCommandEntryPoints( file, gl ) :
 	max_name_length = 0;
@@ -214,13 +214,13 @@ def writeCommandLoad( file, gl ) :
 		file.write( '");\n' );
 	
 def writeCommandTypedefs( file, gl ) :
-	file.write( '        /* Prototypes */\n' );
+	file.write( '    /* Prototypes */\n' );
 	
 	for command in gl.commands :
 		name = "PFN_" + command.name.upper();
 		ret_type = convertParamType(command.ret_type);
 		
-		file.write( '        typedef ' );
+		file.write( '    typedef ' );
 		file.write( ret_type );
 		file.write( ' (OPEN_GL_API * ' );
 		file.write( name );
@@ -238,15 +238,15 @@ def writeCommandTypedefs( file, gl ) :
 		
 		file.write( ');\n');
 			
-	file.write( '\n        /* End of prototypes */\n\n' );
+	file.write( '\n    /* End of prototypes */\n\n' );
 	
 def writeDefines( file ) :
-	file.write( '        /* Defines */\n');
-	file.write( '        #define OPEN_GL_API __stdcall\n\n');
-	file.write( '        /* End of defines */\n');
+	file.write( '    /* Defines */\n');
+	file.write( '    #define OPEN_GL_API __stdcall\n\n');
+	file.write( '    /* End of defines */\n');
 
 def writeEnums( file, gl ) :
-	file.write( '        /* GLenums */\n' );
+	file.write( '    /* GLenums */\n' );
 	max_name_length = 0;
 	
 	for enum in gl.enums :
@@ -262,13 +262,13 @@ def writeEnums( file, gl ) :
 		
 		fill_len = max_name_length - length;
 		
-		file.write( '        #define ' );
+		file.write( '    #define ' );
 		file.write( enum.name );
 		file.write( ' ' * fill_len );
 		file.write( enum.value );
 		file.write( '\n' );
 			
-	file.write( '\n        /* End of GLenums */\n\n' );
+	file.write( '\n    /* End of GLenums */\n\n' );
 	
 def writeIncludes( file ) :
 	file.write(
@@ -276,7 +276,6 @@ def writeIncludes( file ) :
 	'\n'
 	'#include "Context.hpp"\n'
 	'#include "gl.hpp"\n'
-	'#include "GL_loader.hpp"\n'
 	'\n' );
 
 def writeLicense( file ) :
@@ -310,25 +309,25 @@ def writeLicense( file ) :
 	
 def writeLoadFunction( file ) :
 	file.write(
-	'        void * load_function(\n'
-	'            Context & context,\n'
-	'            const char * name)\n'
-	'        {\n'
-	'            void * ptr = context.Get_proc_address(name);\n'
+	'    void * load_function(\n'
+	'        Context & context,\n'
+	'        const char * name)\n'
+	'    {\n'
+	'        void * ptr = context.Get_proc_address(name);\n'
 	'\n'
 	'#if DEBUG\n'
-	'            if (nullptr == ptr)\n'
-	'            {\n'
-	'                DEBUGLOG("Not available: " << name);\n'
-	'            }\n'
-	'#endif /* DEBUG */\n'
-	'        \n'
-	'            return ptr;\n'
+	'        if (nullptr == ptr)\n'
+	'        {\n'
+	'            DEBUGLOG("Not available: " << name);\n'
 	'        }\n'
+	'#endif /* DEBUG */\n'
+	'    \n'
+	'        return ptr;\n'
+	'    }\n'
 	'\n' );
 
 def writeTypes( file, gl ) :
-	file.write( '        /* Typedefs */\n' );
+	file.write( '    /* Typedefs */\n' );
 	
 	types = "";
 	
@@ -356,7 +355,7 @@ def writeTypes( file, gl ) :
 			
 	file.write( types );
 			
-	file.write( '\n        /* End of typedefs */\n\n' );
+	file.write( '\n    /* End of typedefs */\n\n' );
 
 in_path = sys.argv[1];
 wl_path = sys.argv[2]
