@@ -45,7 +45,7 @@ namespace OpenGL
 
         virtual void Make_current() = 0;
 
-        virtual void * Get_proc_address(const char * name) = 0;
+        virtual Platform::proc_t Get_proc_address(const char * name) = 0;
 
         const OpenGL::Functions & Functions() const;
 
